@@ -1,0 +1,213 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, user-scalable=no">
+        <meta name="apple-mobile-web-app-capable" content="yes"> 
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">        
+        
+        <style>
+            background: url(images/bg-tree.jpg) no-repeat center center fixed; 
+            .mobile-body {
+                margin: 0;
+                background:black;
+                overflow: hidden;
+                -webkit-background-size: cover;
+                -moz-background-size: cover;
+                -o-background-size: cover;
+                background-size: cover;
+                background-repeat: no-repeat, repeat;
+                }
+
+                .floater {position: absolute;top: 0px; left:0px;}
+
+                .social-media-icon {width:32;height:32;padding-left:10px;}
+
+                .animated-canvas {
+                        display:block;
+                        image-rendering: optimizeSpeed;             
+                        image-rendering: -moz-crisp-edges;          
+                        image-rendering: -webkit-optimize-contrast; 
+                        image-rendering: -o-crisp-edges;            
+                        image-rendering: crisp-edges;               
+                        -ms-interpolation-mode: nearest-neighbor;   
+                }
+
+                .debug-border {border:5px solid red;}
+        </style>
+
+        <script src="js/utils.js"></script>
+        <script src="js/arc.class.js"></script>
+        <script src="js/animateImg.class.js"></script>
+    </head>
+    <body class="mobile-body">
+
+        <canvas id="canvas-entrance" class="floater animated-canvas" style="" ></canvas>
+
+        <div id="div-social-media"  class="floater" style="border-top:1px solid white;width:100%;text-align: center;padding-top:10px;">
+            <a href="http://www.linkedin.com/in/markusbeamer" target="blank"><img id="img-linkedin"src=images/linkedin.png class="social-media-icon" ></a>
+            <a href="https://github.com/mobeamer" target="blank"><img id="img-linkedin" src=images/github.png  class="social-media-icon" ></a>
+            <a href="https://statsroyale.com/profile/9G2L9YYG" target="blank"><img id="img-linkedin" src=images/clash.png  class="social-media-icon" ></a>
+            <a href="https://twitter.com/markusbeamer" target="blank"><img id="img-linkedin" src=images/twitter.png  class="social-media-icon" ></a>
+        </div>
+
+
+        <img id="img-bg-tree" src="images/bg-tree.png" style="visibility:hidden;width:100px;height:100px;">
+        <img id="img-logo" src="images/logo-beamer-labs.png" style="visibility:hidden;width:100px;height:100px;">
+
+
+        <script>
+
+            var screenWidth = 1000;
+            var screenHeight = 500;
+            var targetFps = 60;
+            var lastCalledTime = Date.now();
+            var fps = 0;
+            
+            var animLoop = "";
+            var animObjs = new Array();
+
+            
+            var backgroundImg = document.getElementById("img-bg-tree");
+            var logoImg = document.getElementById("img-logo");
+
+
+            window.onload = function(e)
+            { 
+                screenWidth = window.innerWidth;
+                screenHeight = window.innerHeight;
+                
+                loadEntrance();
+
+
+                animLoop = setInterval("window.requestAnimationFrame(renderCanvases)",1000 / targetFps);
+            }
+
+            function loadEntrance()
+            {
+                var canvas = document.getElementById("canvas-entrance");
+                var context = canvas.getContext("2d");
+
+                var screenWidth = window.screenWidth;
+                var screenHeight = window.screenHeight;
+                var h = screen.height;
+                var w = screen.width;
+                canvas.style.width = w + "px";
+                canvas.style.height = h + "px";
+                canvas.width = w;
+                canvas.height = h;
+                
+                var top = 0;
+                var left = 0;                
+                canvas.style.top = top + "px";
+                canvas.style.left = left + "px";
+                
+                var dpi = window.devicePixelRatio;
+
+                console.log("Placing Canvas:   " + canvas.id);
+                console.log("DPI:       " + dpi);
+                console.log("Window Dim:       " + window.screenWidth + " x " + window.screenHeight);
+                console.log("Screen Dim:       " + screen.width + " x " + screen.height);
+                console.log("Canvas Dom Dim:   " + canvas.width + " x " + canvas.height);
+                console.log("Canvas Style Dim: " + canvas.style.width + " x " + canvas.style.height);
+                console.log("Using:            " + screenWidth + " x " + screenHeight);
+
+                animObjs.push(new Arc(screenWidth/2,screenHeight - 55, screenHeight * .55));
+                var logoScale = .5;
+                var logoHeight = logoImg.naturalHeight;
+                var logoWidth = logoImg.naturalWidth * logoScale;
+                animObjs.push(new AnimatedImg(logoImg, screenWidth/2 - logoWidth/2,screenHeight * .05, logoScale));
+
+
+
+                var i = document.getElementById("div-social-media");
+                i.style.top = screenHeight - 50;
+
+            }
+
+            
+            function renderCanvases()
+            {
+                var c = document.getElementsByClassName("animated-canvas");
+                for (var i = 0; i < c.length; i++) 
+                {
+                    if(c[i].id == "canvas-entrance")
+                    {
+                        renderEntrance();
+                    }
+                }
+            }  
+
+            function renderEntrance()
+            {
+                var dpi = window.devicePixelRatio;
+                var offscreenCanvas = document.createElement('canvas');
+                offscreenCanvas.width = window.screenWidth;//1920;
+                offscreenCanvas.height =  window.screenHeight;//1200; 
+                context = offscreenCanvas.getContext('2d');
+
+                
+                context.fillStyle = "black";
+                context.fillRect(0,0,offscreenCanvas.width, offscreenCanvas.height);                
+
+                context.fillStyle = "white";
+                context.strokeStyle = "white";
+                context.drawImage(backgroundImg, 0,0, offscreenCanvas.width, offscreenCanvas.height);
+                
+
+                var drawX = screenWidth * .50 - 100;
+                var drawY = screenHeight * .60;
+                const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                var now       = new Date();
+                var thisMonth = monthNames[now.getMonth()];
+                var text = thisMonth;
+                context.fillStyle = "white";
+                context.fontWeight = "bold";
+                context.font = "34px Trebuchet MS";
+                context.fillText(text.toUpperCase(), drawX, drawY);
+                context.fillText(now.getDay(), drawX - 25, drawY);
+                context.fillText(now.getFullYear(), drawX + 165, drawY);
+
+                for(var i=0;i<animObjs.length;i++)
+                {
+                    animObjs[i].render(context);
+                }
+
+
+                var scaleW = screen.width / offscreenCanvas.width;
+
+
+                var delta = (Date.now() - lastCalledTime)/1000;
+                lastCalledTime = Date.now();
+                fps = 1/delta;
+                if(isFinite(fps))
+                {
+                    context.font = "10px Trebuchet MS";
+                    context.fillText("fps:" + Math.round(fps,1), screenWidth-50,screenHeight-25);
+                }
+
+                var canvas = document.getElementById("canvas-entrance");
+                var finalContext = canvas.getContext("2d");                
+                finalContext.drawImage(offscreenCanvas, 0,0);
+                
+                
+                
+            }
+
+
+
+            function getRandom(min, max) { // min and max included 
+                return Math.floor(Math.random() * (max - min + 1) + min);
+            }
+
+
+            //credits
+            //figuring out blurry canvas - https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio
+            //web safe fonts - https://knowledgebase.constantcontact.com/articles/KnowledgeBase/5877-web-safe-font-selections-in-campaign-emails?lang=en_US
+            //dpi/blurry/scaling canvas issue: https://www.html5rocks.com/en/tutorials/canvas/hidpi/
+            //random function: https://stackoverflow.com/questions/4959975/generate-random-number-between-two-numbers-in-javascript
+            //clipping images: drawImage(image,clipX,clipY,clipWidth,clipHeight,0,0,clipWidth,clipHeight);
+
+
+        </script>
+    </body>
+</html>
